@@ -12,16 +12,19 @@ interface ChatState {
   frequencyPenalty: number;
   presencePenalty: number;
   model: string;
+  responseFormat: { type: "text" };
 }
 
 // Define Actions
-type ChatAction =
+export type ChatAction =
   | { type: "ADD_MESSAGE"; payload: Message }
+  | { type: "SET_MODEL"; payload: string }
   | { type: "SET_TEMPERATURE"; payload: number }
   | { type: "SET_MAX_TOKENS"; payload: number }
   | { type: "SET_TOP_P"; payload: number }
   | { type: "SET_FREQUENCY_PENALTY"; payload: number }
-  | { type: "SET_PRESENCE_PENALTY"; payload: number };
+  | { type: "SET_PRESENCE_PENALTY"; payload: number }
+  | { type: "SET_RESPONSE_FORMAT"; payload: { type: "text" } };
 
 // Initial State
 const initialState: ChatState = {
@@ -32,11 +35,16 @@ const initialState: ChatState = {
   topP: 1.0,
   frequencyPenalty: 0.0,
   presencePenalty: 0.0,
+  responseFormat: { type: "text" },
 };
 
 // Reducer function
 const chatReducer = (state: ChatState, action: ChatAction): ChatState => {
   switch (action.type) {
+    case "SET_MODEL":
+      return { ...state, model: action.payload };
+    case "SET_RESPONSE_FORMAT":
+      return { ...state, responseFormat: { type: "text" } };
     case "ADD_MESSAGE":
       return { ...state, messages: [...state.messages, action.payload] };
     case "SET_TEMPERATURE":

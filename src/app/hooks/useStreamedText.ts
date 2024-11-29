@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useTransition } from "react";
 import OpenAI from "openai";
 import { useChatContext } from "../context/chatContext";
 
@@ -21,13 +21,16 @@ interface ChatState {
 
 export const useStreamedText = () => {
   const [streamedText, setStreamedText] = useState<string>(""); // Full text being streamed
+  const [isThinking, setIsThinking] = useState<boolean>(false);
   const [isStreaming, setIsStreaming] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
+  const [pending, startTransition] = useTransition();
 
   const fetchStream = async (params: ChatState) => {
     setIsStreaming(true);
     setStreamedText("");
     setError(null);
+    setIsThinking(true);
 
     try {
       const responseStream = await openai.chat.completions.create({
@@ -40,11 +43,12 @@ export const useStreamedText = () => {
         model: params.model,
         messages: params.messages,
       });
+      setIsThinking(false);
 
       for await (const chunk of responseStream) {
         const content = extractChunkContent(chunk);
         if (content) {
-          setStreamedText((prev) => prev + content); // Accumulate the streamed text
+          startTransition(() => setStreamedText((prev) => prev + content));
         }
       }
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -52,6 +56,7 @@ export const useStreamedText = () => {
       setError(err.message || "An error occurred during streaming.");
     } finally {
       setIsStreaming(false);
+      setIsThinking(false);
     }
   };
 
@@ -63,5 +68,12 @@ export const useStreamedText = () => {
     return null;
   };
 
-  return { streamedText, isStreaming, error, fetchStream, setStreamedText };
+  return {
+    streamedText,
+    isStreaming,
+    error,
+    fetchStream,
+    setStreamedText,
+    isThinking,
+  };
 };
