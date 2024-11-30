@@ -10,7 +10,7 @@ export function ChatInput() {
   const [input, setInput] = useState("");
   const textareaRef = useRef<HTMLTextAreaElement | null>(null);
   const { dispatch, state: modelSate } = useChatContext();
-  const { fetchStream, isStreaming, streamedText } = useStreamedText();
+  const { fetchStream, isStreaming, streamingText } = useStreamedText();
 
   const adjustTextareaHeight = () => {
     const textarea = textareaRef.current;
@@ -50,10 +50,10 @@ export function ChatInput() {
   }, [input]);
 
   useEffect(() => {
-    if (!isStreaming && streamedText) {
+    if (!isStreaming && streamingText) {
       dispatch({
         type: "ADD_MESSAGE",
-        payload: { role: "assistant", content: streamedText },
+        payload: { role: "assistant", content: streamingText },
       });
       setInput("");
     }

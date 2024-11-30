@@ -16,15 +16,16 @@ const TypeWriterWithIndicator: React.FC<TypeWriterWithIndicatorProps> = ({
   isTyping,
 }) => {
   return (
-    <div className="flex-column">
+    <div className="flex flex-col">
       <ReactMarkdown
         remarkPlugins={[remarkGfm]}
         rehypePlugins={[rehypeHighlight]}
+        className="whitespace-pre-line text-sm sm:text-base md:text-lg"
       >
         {`${streamText}`}
       </ReactMarkdown>
       {isTyping && (
-        <div className="inline-block w-3 h-3 bg-white rounded-full animate-blink"></div>
+        <div className="inline-block w-3 h-3 bg-white rounded-full animate-blink mt-2 sm:mt-3 md:mt-4"></div>
       )}
     </div>
   );
