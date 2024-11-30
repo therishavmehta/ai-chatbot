@@ -3,19 +3,19 @@
 import React, { useState, useRef, useEffect, KeyboardEvent } from "react";
 import { useChatContext } from "../context/chatContext";
 import { useStreamedText } from "@/hooks/useStreamedText";
+import { Send } from "lucide-react";
 
 interface ChatInput {
-  fetchStream: (params: any) => void;
-  scrollToBottom: () => void;
+  handleSubmit: (e: React.FormEvent) => void;
+  input: string;
+  setInput: (value: string) => void;
 }
 
 const ChatInput: React.FC<ChatInput> = ({
-  fetchStream,
-  scrollToBottom,
+  handleSubmit,
+  input,
+  setInput,
 }: ChatInput) => {
-  const { dispatch, state: modelSate } = useChatContext();
-  const { streamedText, isStreaming } = useStreamedText();
-  const [input, setInput] = useState("");
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
   const handleKeyDown = (e: KeyboardEvent<HTMLTextAreaElement>) => {
@@ -28,35 +28,6 @@ const ChatInput: React.FC<ChatInput> = ({
   useEffect(() => {
     if (textareaRef.current) textareaRef.current?.focus();
   }, []);
-
-  useEffect(() => {
-    if (!isStreaming && streamedText) {
-      dispatch({
-        type: "ADD_MESSAGE",
-        payload: { role: "assistant", content: streamedText },
-      });
-      setInput("");
-    }
-  }, [isStreaming]);
-
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (input.trim()) {
-      dispatch({
-        type: "ADD_MESSAGE",
-        payload: { role: "user", content: input.trim() },
-      });
-      setInput("");
-      fetchStream({
-        ...modelSate,
-        messages: [
-          ...modelSate.messages,
-          { role: "user", content: input.trim() },
-        ],
-      });
-      scrollToBottom();
-    }
-  };
 
   useEffect(() => {
     if (textareaRef.current) {
@@ -77,7 +48,7 @@ const ChatInput: React.FC<ChatInput> = ({
           value={input}
           onKeyDown={handleKeyDown}
           onChange={(e) => setInput(e.target.value.slice(0, 1000))}
-          className="flex-1 bg-transparent text-gray-200 outline-none px-2 resize-none overflow-hidden"
+          className="flex-1 bg-transparent text-gray-200 outline-none px-2 resize-none overflow-auto"
           placeholder="Enter your message..."
           rows={1} // Start with a single row
         />
@@ -88,7 +59,7 @@ const ChatInput: React.FC<ChatInput> = ({
             !input.trim() ? "opacity-50 cursor-not-allowed" : ""
           }`}
         >
-          Send
+          <Send />
         </button>
       </div>
     </form>

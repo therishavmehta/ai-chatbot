@@ -1,6 +1,5 @@
 import { useState, useTransition } from "react";
 import OpenAI from "openai";
-import { useChatContext } from "../context/chatContext";
 
 const openai = new OpenAI({
   dangerouslyAllowBrowser: true,
@@ -20,17 +19,19 @@ interface ChatState {
 }
 
 export const useStreamedText = () => {
-  const [streamedText, setStreamedText] = useState<string>(""); // Full text being streamed
+  const [streamingText, setStreamingText] = useState<string>(""); // Full text being streamed
   const [isThinking, setIsThinking] = useState<boolean>(false);
   const [isStreaming, setIsStreaming] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
   const [pending, startTransition] = useTransition();
+  const [streamedText, setStreamedText] = useState("");
 
   const fetchStream = async (params: ChatState) => {
     setIsStreaming(true);
-    setStreamedText("");
+    setStreamingText("");
     setError(null);
     setIsThinking(true);
+    let res = "";
 
     try {
       const responseStream = await openai.chat.completions.create({
@@ -48,7 +49,8 @@ export const useStreamedText = () => {
       for await (const chunk of responseStream) {
         const content = extractChunkContent(chunk);
         if (content) {
-          startTransition(() => setStreamedText((prev) => prev + content));
+          startTransition(() => setStreamingText((prev) => prev + content));
+          res += content;
         }
       }
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -57,6 +59,7 @@ export const useStreamedText = () => {
     } finally {
       setIsStreaming(false);
       setIsThinking(false);
+      setStreamedText(res);
     }
   };
 
@@ -69,11 +72,13 @@ export const useStreamedText = () => {
   };
 
   return {
-    streamedText,
+    streamingText,
     isStreaming,
     error,
     fetchStream,
-    setStreamedText,
+    setStreamingText,
     isThinking,
+    streamedText,
+    setStreamedText,
   };
 };

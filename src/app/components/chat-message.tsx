@@ -8,7 +8,7 @@ import "highlight.js/styles/github.css";
 interface ChatMessageProps {
   role: "system" | "user" | "assistant";
   content: string;
-  streamedText: string;
+  streamingText: string;
   isStreaming: boolean;
   isLastIdx: boolean;
 }
@@ -17,8 +17,7 @@ export function ChatMessage({
   role,
   content,
   isLastIdx,
-  streamedText,
-  isStreaming,
+  streamingText,
 }: ChatMessageProps) {
   return (
     <>
@@ -42,7 +41,7 @@ export function ChatMessage({
           </ReactMarkdown>
         </div>
       </div>
-      {isLastIdx && streamedText && (
+      {isLastIdx && streamingText && (
         <div className="border-b border-border-default px-4 py-6">
           <div className="flex items-start justify-between">
             <span className="font-medium text-foreground-secondary capitalize">

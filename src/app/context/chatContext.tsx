@@ -18,17 +18,19 @@ interface ChatState {
 // Define Actions
 export type ChatAction =
   | { type: "ADD_MESSAGE"; payload: Message }
+  | { type: "LOAD_MESSAGES"; payload: Message[] }
   | { type: "SET_MODEL"; payload: string }
   | { type: "SET_TEMPERATURE"; payload: number }
   | { type: "SET_MAX_TOKENS"; payload: number }
   | { type: "SET_TOP_P"; payload: number }
   | { type: "SET_FREQUENCY_PENALTY"; payload: number }
   | { type: "SET_PRESENCE_PENALTY"; payload: number }
+  | { type: "SET_ALL_PARAMS"; payload: any }
   | { type: "SET_RESPONSE_FORMAT"; payload: { type: "text" } };
 
 // Initial State
 const initialState: ChatState = {
-  messages: [{ role: "user", content: "Hello!" }],
+  messages: [],
   model: "gpt-4o",
   temperature: 1.0,
   maxTokens: 2048,
@@ -41,6 +43,8 @@ const initialState: ChatState = {
 // Reducer function
 const chatReducer = (state: ChatState, action: ChatAction): ChatState => {
   switch (action.type) {
+    case "LOAD_MESSAGES":
+      return { ...state, messages: action.payload };
     case "SET_MODEL":
       return { ...state, model: action.payload };
     case "SET_RESPONSE_FORMAT":
@@ -57,6 +61,8 @@ const chatReducer = (state: ChatState, action: ChatAction): ChatState => {
       return { ...state, frequencyPenalty: action.payload };
     case "SET_PRESENCE_PENALTY":
       return { ...state, presencePenalty: action.payload };
+    case "SET_ALL_PARAMS":
+      return { ...state, ...action.payload };
     default:
       throw new Error(`Unhandled action type: ${action}`);
   }

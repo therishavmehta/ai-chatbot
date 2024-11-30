@@ -7,7 +7,7 @@ import { useStreamedText } from "./hooks/useStreamedText";
 import "highlight.js/styles/github.css";
 
 const StreamingChat: React.FC = () => {
-  const { streamedText, isStreaming, error, fetchStream } = useStreamedText();
+  const { streamingText, isStreaming, error, fetchStream } = useStreamedText();
   const containerRef = useRef<HTMLDivElement>(null);
 
   const bindedStream = fetchStream.bind(
@@ -41,7 +41,7 @@ const StreamingChat: React.FC = () => {
     if (containerRef.current) {
       containerRef.current.scrollTop = containerRef.current.scrollHeight;
     }
-  }, [streamedText]);
+  }, [streamingText]);
 
   return (
     <div style={{ padding: "20px", fontFamily: "Arial, sans-serif" }}>
@@ -77,7 +77,7 @@ const StreamingChat: React.FC = () => {
             remarkPlugins={[remarkGfm]}
             rehypePlugins={[rehypeHighlight]}
           >
-            {streamedText}
+            {streamingText}
           </ReactMarkdown>
         )}
       </div>
