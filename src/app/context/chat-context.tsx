@@ -15,6 +15,7 @@ const initialState: IFCChatState = {
   topP: 1.0,
   frequencyPenalty: 0.0,
   presencePenalty: 0.0,
+  apiKey: "",
 };
 
 // Reducer function
@@ -41,6 +42,8 @@ const chatReducer = (
       return { ...state, presencePenalty: action.payload };
     case IFCChatActionType.SET_ALL_PARAMS:
       return { ...state, ...action.payload };
+    case IFCChatActionType.SET_API_KEY:
+      return { ...state, apiKey: action.payload };
     default:
       throw new Error(`Unhandled action type: ${action}`);
   }

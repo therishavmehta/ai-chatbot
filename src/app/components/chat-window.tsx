@@ -9,6 +9,7 @@ import ChatStream from "./chat-stream";
 import { saveMessage, getMessages } from "@/lib/indexedDB"; // Import the utility functions
 import { Virtuoso, VirtuosoHandle } from "react-virtuoso";
 import { IFCChatActionType, IFCRole } from "@/types/message";
+import ThemedToast from "./ui/toast";
 
 const ChatWindow: React.FC = () => {
   const { dispatch, state } = useChatContext();
@@ -21,10 +22,16 @@ const ChatWindow: React.FC = () => {
     isThinking,
     streamedText,
     setStreamedText,
+    error,
   } = useStreamedText();
   const [input, setInput] = useState<string>("");
   const [isAutoScroll, setIsAutoScroll] = useState<boolean>(true);
   const virtuosoRef = useRef<VirtuosoHandle>(null); // Virtuoso ref to interact with the list
+  const [toast, setToast] = useState({
+    title: "",
+    open: false,
+    description: "",
+  });
 
   // Fetch chat history on initial load
   useEffect(() => {
@@ -41,6 +48,16 @@ const ChatWindow: React.FC = () => {
     };
     fetchChatHistory();
   }, [dispatch]);
+
+  useEffect(() => {
+    if (error && error.length) {
+      setToast({
+        title: "Error",
+        description: error || "something went wrong",
+        open: true,
+      });
+    }
+  }, [error]);
 
   useEffect(() => {
     (async function () {
@@ -128,6 +145,7 @@ const ChatWindow: React.FC = () => {
         input={input}
         setInput={setInput}
       />
+      <ThemedToast setOpen={setToast} {...toast} />
     </div>
   );
 };
