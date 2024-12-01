@@ -18,6 +18,7 @@ export interface IFCChatParameters {
   frequencyPenalty: number;
   presencePenalty: number;
   model: string;
+  apiKey: string;
 }
 
 export enum IFCChatParameterKeys {
@@ -39,6 +40,7 @@ export enum IFCChatActionType {
   SET_PRESENCE_PENALTY = "SET_PRESENCE_PENALTY",
   SET_ALL_PARAMS = "SET_ALL_PARAMS",
   SET_RESPONSE_FORMAT = "SET_RESPONSE_FORMAT",
+  SET_API_KEY = "SET_API_KEY",
 }
 
 export type IFCChatAction =
@@ -50,6 +52,7 @@ export type IFCChatAction =
   | { type: IFCChatActionType.SET_TOP_P; payload: number }
   | { type: IFCChatActionType.SET_FREQUENCY_PENALTY; payload: number }
   | { type: IFCChatActionType.SET_PRESENCE_PENALTY; payload: number }
+  | { type: IFCChatActionType.SET_API_KEY; payload: string }
   | {
       type: IFCChatActionType.SET_ALL_PARAMS;
       payload: IFCChatParameters;

@@ -74,6 +74,7 @@ const params: IFCParam[] = [
 const ChatParameters: React.FC = () => {
   const { state, dispatch } = useChatContext();
   const [localConfig, setLocalConfig] = useState<IFCChatParameters>({
+    apiKey: state.apiKey,
     model: state.model,
     maxTokens: state.maxTokens,
     temperature: state.temperature,
@@ -88,6 +89,7 @@ const ChatParameters: React.FC = () => {
     description: "",
     open: false,
   });
+
 
   // Load configuration from IndexedDB
   useEffect(() => {
@@ -115,10 +117,11 @@ const ChatParameters: React.FC = () => {
 
   const handleSaveConfig = async () => {
     try {
-      await saveConfig(localConfig);
+      // Add API key to the config before saving
+      await saveConfig(localConfig); // Save the configuration in IndexedDB
       dispatch({
         type: IFCChatActionType.SET_ALL_PARAMS,
-        payload: localConfig,
+        payload: localConfig, // Update chatContext
       });
       setOpenToast({
         title: "Successful",
@@ -135,7 +138,7 @@ const ChatParameters: React.FC = () => {
     }
   };
 
-  // Disable save button if localConfig is the same as initialConfig
+  // Disable save button if localConfig is the same as initialConfig or API key is missing
   const isConfigDirty =
     JSON.stringify(localConfig) !== JSON.stringify(initialConfig);
 
@@ -168,6 +171,24 @@ const ChatParameters: React.FC = () => {
           </SelectContent>
         </Select>
       </div>
+
+      {/* API Key Input Box */}
+      <div className="mb-4">
+        <Label className="block text-sm font-medium mb-2 text-foreground-secondary">
+          Enter API Key
+        </Label>
+        <input
+          type="text"
+          value={localConfig.apiKey}
+          onChange={(e) =>
+            setLocalConfig((prev) => ({ ...prev, apiKey: e.target.value }))
+          }
+          className="w-full bg-background-secondary border p-2 rounded focus:outline-none focus:ring-2 focus:ring-primary"
+          placeholder="Enter your API key"
+        />
+      </div>
+
+      {/* Parameter Sliders */}
       {params.map((item, idx) => {
         return (
           <div key={idx} className="mb-4">
@@ -192,6 +213,7 @@ const ChatParameters: React.FC = () => {
           </div>
         );
       })}
+
       {/* Save Button */}
       <div className="mb-4">
         <Button
@@ -199,11 +221,12 @@ const ChatParameters: React.FC = () => {
           variant={"default"}
           size="lg"
           className="w-full"
-          disabled={!isConfigDirty} // Disable button if config is not dirty
+          disabled={!isConfigDirty} // Disable if config is not dirty or API key is missing
         >
           Save Configuration
         </Button>
       </div>
+
       <ThemedToast {...openToast} setOpen={setOpenToast} />
     </div>
   );

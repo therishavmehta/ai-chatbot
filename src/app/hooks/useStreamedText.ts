@@ -1,11 +1,7 @@
 import { useState, useTransition } from "react";
 import OpenAI from "openai";
 import { IFCMessage } from "@/types/message";
-
-const openai = new OpenAI({
-  dangerouslyAllowBrowser: true,
-  apiKey: process.env.NEXT_PUBLIC_OPENAI_API_KEY, // Replace with the correct env variable prefix
-});
+import { useChatContext } from "@/context/chat-context";
 
 interface ChatState {
   messages: IFCMessage[];
@@ -24,6 +20,14 @@ export const useStreamedText = () => {
   const [error, setError] = useState<string | null>(null);
   const [, startTransition] = useTransition();
   const [streamedText, setStreamedText] = useState("");
+  const {
+    state: { apiKey },
+  } = useChatContext();
+
+  const openai = new OpenAI({
+    dangerouslyAllowBrowser: true,
+    apiKey: apiKey, // Replace with the correct env variable prefix
+  });
 
   const fetchStream = async (params: ChatState) => {
     setIsStreaming(true);
