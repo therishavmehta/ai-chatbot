@@ -90,8 +90,6 @@ const ChatParameters: React.FC = () => {
     open: false,
   });
 
-  // Add new state for API key
-  const [apiKey, setApiKey] = useState<string>("");
 
   // Load configuration from IndexedDB
   useEffect(() => {
