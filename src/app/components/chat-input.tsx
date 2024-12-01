@@ -1,94 +1,67 @@
 "use client";
 
-import React, { useState, useRef, KeyboardEvent, useEffect } from "react";
-import { Play } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { useChatContext } from "@/context/chatContext";
-import { useStreamedText } from "@/hooks/useStreamedText";
+import React, { useState, useRef, useEffect, KeyboardEvent } from "react";
+import { useChatContext } from "../context/chat-context";
+import { Send } from "lucide-react";
+import { Button } from "./ui/button";
 
-export function ChatInput() {
-  const [input, setInput] = useState("");
-  const textareaRef = useRef<HTMLTextAreaElement | null>(null);
-  const { dispatch, state: modelSate } = useChatContext();
-  const { fetchStream, isStreaming, streamingText } = useStreamedText();
+interface ChatInput {
+  handleSubmit: (e: React.FormEvent) => void;
+  input: string;
+  setInput: (value: string) => void;
+}
 
-  const adjustTextareaHeight = () => {
-    const textarea = textareaRef.current;
-    if (textarea) {
-      textarea.style.height = "auto";
-      textarea.style.height = `${textarea.scrollHeight}px`;
-    }
-  };
-
-  const handleSubmit = (e?: React.FormEvent) => {
-    e?.preventDefault();
-    if (input.trim()) {
-      dispatch({
-        type: "ADD_MESSAGE",
-        payload: { role: "user", content: input.trim() },
-      });
-      setInput("");
-      fetchStream({
-        ...modelSate,
-        messages: [
-          ...modelSate.messages,
-          { role: "user", content: input.trim() },
-        ],
-      });
-    }
-  };
+const ChatInput: React.FC<ChatInput> = ({
+  handleSubmit,
+  input,
+  setInput,
+}: ChatInput) => {
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
 
   const handleKeyDown = (e: KeyboardEvent<HTMLTextAreaElement>) => {
     if (e.key === "Enter" && (e.metaKey || e.ctrlKey)) {
       e.preventDefault();
-      handleSubmit();
+      handleSubmit(e);
     }
   };
 
   useEffect(() => {
-    adjustTextareaHeight();
-  }, [input]);
+    if (textareaRef.current) textareaRef.current?.focus();
+  }, []);
 
   useEffect(() => {
-    if (!isStreaming && streamingText) {
-      dispatch({
-        type: "ADD_MESSAGE",
-        payload: { role: "assistant", content: streamingText },
-      });
-      setInput("");
+    if (textareaRef.current) {
+      // Adjust the height of the textarea dynamically
+      textareaRef.current.style.height = "auto"; // Reset height
+      textareaRef.current.style.height = `${Math.min(
+        textareaRef.current.scrollHeight,
+        200 // Maximum height in pixels
+      )}px`;
     }
-  }, [isStreaming]);
+  }, [input]);
 
   return (
-    <div className="border-t border-border-default bg-background-secondary p-4">
-      <div className="flex items-center gap-2 rounded-lg bg-background-tertiary p-2">
-        <div className="flex-1">
-          <textarea
-            ref={textareaRef}
-            className="w-full bg-transparent px-2 py-1 text-foreground-primary placeholder-foreground-tertiary focus:outline-none resize-none m-h-400"
-            placeholder="Enter user message... (Command+Enter to send)"
-            rows={1}
-            value={input}
-            onChange={(e) => setInput(e.target.value)}
-            onKeyDown={handleKeyDown}
-            aria-label="Chat input"
-          />
-        </div>
-        <div className="flex items-center gap-2">
-          <Button
-            onClick={handleSubmit}
-            disabled={!input.trim()}
-            variant="outline"
-            aria-label="Run message"
-          >
-            <Play className="h-5 w-5 mr-2" />
-            Run
-          </Button>
-        </div>
+    <form onSubmit={handleSubmit} className="mt-4">
+      <div className="flex h-auto items-center bg-background-secondary border border-border hover:border-border-hover rounded-lg p-2">
+        <textarea
+          ref={textareaRef}
+          value={input}
+          onKeyDown={handleKeyDown}
+          onChange={(e) => setInput(e.target.value.slice(0, 1000))}
+          className="flex-1 bg-transparent text-foreground-primary outline-none px-2 resize-none overflow-auto"
+          placeholder="Enter your message..."
+          rows={1} // Start with a single row
+        />
+        <Button
+          type="submit"
+          disabled={!input.trim()} // Disable Button if input is empty
+          variant="ghost"
+        >
+          <Send />
+        </Button>
       </div>
-      <div className="mt-2 text-xs text-foreground-tertiary text-center">
-        Press Command+Enter (Mac) or Ctrl+Enter (Windows) to run or send
-      </div>
-    </div>
+    </form>
   );
-}
+};
+
+export default ChatInput;

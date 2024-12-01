@@ -1,68 +1,63 @@
 "use client";
-import { Copy, Brain } from "lucide-react";
+import React, { useState } from "react";
 import ReactMarkdown from "react-markdown";
 import rehypeHighlight from "rehype-highlight";
 import remarkGfm from "remark-gfm";
 import "highlight.js/styles/github.css";
+import { Copy, Brain } from "lucide-react";
+import ThemedToast from "./ui/toast";
+import { IFCMessage } from "@/types/message";
 
-interface ChatMessageProps {
-  role: "system" | "user" | "assistant";
-  content: string;
-  streamingText: string;
-  isStreaming: boolean;
-  isLastIdx: boolean;
-}
+const ChatMessage: React.FC<IFCMessage> = ({ role = "user", content = "" }) => {
+  const isUser = role === "user";
+  const [openToast, setOpenToast] = useState({
+    title: "",
+    description: "",
+    open: false,
+  });
 
-export function ChatMessage({
-  role,
-  content,
-  isLastIdx,
-  streamingText,
-}: ChatMessageProps) {
+  const handleCopy = async () => {
+    try {
+      await navigator.clipboard.writeText(content);
+      setOpenToast({
+        title: "Copied",
+        description: "Copied to clipboard",
+        open: true,
+      });
+    } catch (err) {
+      console.error("Failed to copy: ", err);
+    }
+  };
+
   return (
-    <>
-      <div className="border-b border-border-default px-4 py-6">
-        <div className="flex items-start justify-between">
-          <span className="font-medium text-foreground-secondary capitalize">
-            {role}
-          </span>
-          <div className="flex items-center gap-2">
-            <button className="text-foreground-tertiary hover:text-foreground-secondary">
-              <Copy className="h-4 w-4" />
-            </button>
-          </div>
-        </div>
-        <div className="mt-2 text-foreground-primary">
-          <ReactMarkdown
-            remarkPlugins={[remarkGfm]}
-            rehypePlugins={[rehypeHighlight]}
-          >
-            {content}
-          </ReactMarkdown>
-        </div>
+    <div
+      className={`flex ${
+        isUser ? "justify-end" : "justify-start"
+      } text-sm mb-2`}
+    >
+      {!isUser && <Brain className="flex-shrink-0 h-6 w-6 mr-2 mt-4" />}
+      <div
+        className={`p-3 rounded-lg flex-shrink-1 ${
+          isUser
+            ? "bg-accent-primary text-foreground-primary max-w-full sm:max-w-xl" // Updated with design system colors
+            : "text-foreground-primary bg-background-secondary max-w-full sm:max-w-4xl" // Updated with design system colors
+        }`}
+      >
+        {!isUser && (
+          <button className="text-foreground-tertiary hover:text-foreground-secondary float-right">
+            <Copy onClick={handleCopy} className="h-4 w-4 sm:h-5 sm:w-5" />
+          </button>
+        )}
+        <ReactMarkdown
+          remarkPlugins={[remarkGfm]}
+          rehypePlugins={[rehypeHighlight]}
+        >
+          {content}
+        </ReactMarkdown>
       </div>
-      {isLastIdx && streamingText && (
-        <div className="border-b border-border-default px-4 py-6">
-          <div className="flex items-start justify-between">
-            <span className="font-medium text-foreground-secondary capitalize">
-              {role}
-            </span>
-            <div className="flex items-center gap-2">
-              <button className="text-foreground-tertiary hover:text-foreground-secondary">
-                <Copy className="h-4 w-4" />
-              </button>
-            </div>
-          </div>
-          <div className="mt-2 text-foreground-primary">
-            <ReactMarkdown
-              remarkPlugins={[remarkGfm]}
-              rehypePlugins={[rehypeHighlight]}
-            >
-              {content}
-            </ReactMarkdown>
-          </div>
-        </div>
-      )}
-    </>
+      <ThemedToast {...openToast} setOpen={setOpenToast} />
+    </div>
   );
-}
+};
+
+export default ChatMessage;

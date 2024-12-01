@@ -1,7 +1,7 @@
 "use client";
-import ChatParameters from "@/components/ChatParameters";
-import ChatWindow from "@/components/ChatWindow";
-import { ChatProvider } from "../context/chatContext";
+import ChatParameters from "@/components/chat-parameters";
+import ChatWindow from "@/components/chat-window";
+import { ChatProvider } from "../context/chat-context";
 import { useState } from "react";
 
 export default function Playground() {
@@ -13,7 +13,7 @@ export default function Playground() {
 
   return (
     <ChatProvider>
-      <div className="flex flex-col md:flex-row h-screen bg-gray-900 text-white">
+      <div className="flex flex-col md:flex-row h-screen bg-gray-900 text-white overflow-y-hidden">
         {/* Mobile Sidebar Toggle */}
         <button
           onClick={toggleSidebar}

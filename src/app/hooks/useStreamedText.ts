@@ -1,15 +1,14 @@
 import { useState, useTransition } from "react";
 import OpenAI from "openai";
+import { IFCMessage } from "@/types/message";
 
 const openai = new OpenAI({
   dangerouslyAllowBrowser: true,
   apiKey: process.env.NEXT_PUBLIC_OPENAI_API_KEY, // Replace with the correct env variable prefix
 });
 
-type Message = { role: "user" | "assistant"; content: string };
-
 interface ChatState {
-  messages: Message[];
+  messages: IFCMessage[];
   temperature: number;
   maxTokens: number;
   topP: number;

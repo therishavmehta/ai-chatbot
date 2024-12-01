@@ -1,88 +1,42 @@
 "use client";
-import React, { useRef, useEffect } from "react";
-import ReactMarkdown from "react-markdown";
-import rehypeHighlight from "rehype-highlight";
-import remarkGfm from "remark-gfm";
-import { useStreamedText } from "./hooks/useStreamedText";
-import "highlight.js/styles/github.css";
+import { useState } from "react";
+import ChatParameters from "@/components/chat-parameters";
+import ChatWindow from "@/components/chat-window";
+import { ChatProvider } from "@/context/chat-context";
 
-const StreamingChat: React.FC = () => {
-  const { streamingText, isStreaming, error, fetchStream } = useStreamedText();
-  const containerRef = useRef<HTMLDivElement>(null);
+export default function Playground() {
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
-  const bindedStream = fetchStream.bind(
-    {},
-    {
-      model: "gpt-4",
-      messages: [
-        {
-          role: "user",
-          content: "hello",
-        },
-        {
-          role: "assistant",
-          content: "Hello! How can I assist you today?",
-        },
-        {
-          role: "user",
-          content: "find sum of 2 number in js function.",
-        },
-      ],
-      temperature: 1,
-      max_tokens: 2048,
-      top_p: 1,
-      frequency_penalty: 0,
-      presence_penalty: 0,
-      stream: true, // Enable streaming
-    }
-  );
-
-  useEffect(() => {
-    if (containerRef.current) {
-      containerRef.current.scrollTop = containerRef.current.scrollHeight;
-    }
-  }, [streamingText]);
+  const toggleSidebar = () => {
+    setIsSidebarOpen(!isSidebarOpen);
+  };
 
   return (
-    <div style={{ padding: "20px", fontFamily: "Arial, sans-serif" }}>
-      <button
-        onClick={bindedStream}
-        style={{
-          padding: "10px 20px",
-          marginBottom: "20px",
-          fontSize: "16px",
-          cursor: "pointer",
-        }}
-        disabled={isStreaming} // Disable button during streaming
-      >
-        {isStreaming ? "Streaming..." : "Start Streaming"}
-      </button>
-      <div
-        ref={containerRef}
-        style={{
-          border: "1px solid #ddd",
-          padding: "20px",
-          borderRadius: "8px",
-          background: "#f9f9f9",
-          overflowY: "auto",
-          maxHeight: "400px",
-          whiteSpace: "pre-wrap",
-          fontFamily: "Courier New, monospace",
-        }}
-      >
-        {error ? (
-          <p style={{ color: "red" }}>Error: {error}</p>
-        ) : (
-          <ReactMarkdown
-            remarkPlugins={[remarkGfm]}
-            rehypePlugins={[rehypeHighlight]}
-          >
-            {streamingText}
-          </ReactMarkdown>
-        )}
-      </div>
-    </div>
-  );
-};
+    <ChatProvider>
+      <div className="flex flex-col md:flex-row h-screen bg-gray-900 text-white overflow-y-hidden">
+        {/* Mobile Sidebar Toggle */}
+        <button
+          onClick={toggleSidebar}
+          className="md:hidden p-4 text-gray-400 hover:text-white"
+        >
+          <span className="text-2xl">☰</span> {/* Hamburger icon */}
+        </button>
 
-export default StreamingChat;
+        {/* Chat Window */}
+        <div className="flex-1 p-4 overflow-y-auto">
+          <ChatWindow />
+        </div>
+
+        {/* Sidebar for Parameters */}
+        <div
+          className={`w-full md:w-1/4 bg-gray-800 p-4 border-l border-gray-700 md:block ${
+            isSidebarOpen ? "block" : "hidden"
+          }`}
+        >
+          <h2 className="text-lg font-bold mb-4">Model Configuration</h2>
+          <ChatParameters />
+        </div>
+      </div>
+    </ChatProvider>
+  );
+}
