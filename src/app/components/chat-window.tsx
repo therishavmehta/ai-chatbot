@@ -1,11 +1,14 @@
 "use client";
+
 import React, { useEffect, useRef, useState } from "react";
-import { useChatContext } from "../context/chatContext";
-import ChatMessage from "./ChatMessage";
-import ChatInput from "./ChatInput";
+import { useChatContext } from "../context/chat-context";
+import ChatMessage from "./chat-message";
+import ChatInput from "./chat-input";
 import { useStreamedText } from "../hooks/useStreamedText";
 import ChatStream from "./chat-stream";
 import { saveMessage, getMessages } from "@/lib/indexedDB"; // Import the utility functions
+import { Virtuoso } from "react-virtuoso";
+import { IFCChatActionType, IFCRole } from "@/types/message";
 
 const ChatWindow: React.FC = () => {
   const { dispatch, state } = useChatContext();
@@ -21,8 +24,7 @@ const ChatWindow: React.FC = () => {
   } = useStreamedText();
   const [input, setInput] = useState<string>("");
   const [isAutoScroll, setIsAutoScroll] = useState<boolean>(true);
-  const containerRef = useRef<HTMLDivElement>(null);
-  const endOfContentRef = useRef<HTMLDivElement>(null);
+  const virtuosoRef = useRef<any>(null); // Virtuoso ref to interact with the list
 
   // Fetch chat history on initial load
   useEffect(() => {
@@ -30,23 +32,22 @@ const ChatWindow: React.FC = () => {
       try {
         const storedMessages = await getMessages();
         dispatch({
-          type: "LOAD_MESSAGES",
+          type: IFCChatActionType.LOAD_MESSAGES,
           payload: storedMessages,
         });
-        console.log(storedMessages);
       } catch (error) {
         console.error("Failed to fetch messages from IndexedDB", error);
       }
     };
     fetchChatHistory();
-  }, []);
+  }, [dispatch]);
 
   useEffect(() => {
     (async function () {
       if (!isStreaming && streamedText) {
-        const newMessage = { role: "assistant", content: streamedText };
+        const newMessage = { role: IFCRole.ASSISTANT, content: streamedText };
         dispatch({
-          type: "ADD_MESSAGE",
+          type: IFCChatActionType.ADD_MESSAGE,
           payload: newMessage,
         });
         saveMessage(newMessage);
@@ -55,14 +56,14 @@ const ChatWindow: React.FC = () => {
         setIsAutoScroll(true);
       }
     })();
-  }, [isStreaming]);
+  }, [isStreaming, streamedText, setStreamingText, setStreamedText, dispatch]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (input.trim()) {
-      const newMessage = { role: "user", content: input.trim() || "" };
+      const newMessage = { role: IFCRole.USER, content: input.trim() || "" };
       dispatch({
-        type: "ADD_MESSAGE",
+        type: IFCChatActionType.ADD_MESSAGE,
         payload: newMessage,
       });
       saveMessage(newMessage);
@@ -70,38 +71,44 @@ const ChatWindow: React.FC = () => {
       setIsAutoScroll(true);
       fetchStream({
         ...state,
-        messages: [...state.messages, { role: "user", content: input.trim() }],
+        messages: [
+          ...state.messages,
+          { role: IFCRole.USER, content: input.trim() },
+        ],
       });
     }
   };
 
-  const scrollToBottom = () => {
-    endOfContentRef.current &&
-      endOfContentRef.current.scrollIntoView({ behavior: "smooth" });
+  const handleScroll = () => {
+    setIsAutoScroll(false); // Disable auto-scroll if user manually scrolls
   };
 
   useEffect(() => {
-    if (endOfContentRef.current && isStreaming && isAutoScroll) {
-      scrollToBottom();
+    // Keep the view at the bottom until streaming ends
+    if (virtuosoRef.current && isAutoScroll) {
+      virtuosoRef.current.scrollToIndex(messages.length - 1);
     }
-  }, [streamingText, isStreaming, isAutoScroll]);
+  }, [messages, isAutoScroll]);
 
-  const handleScroll = () => {
-    setIsAutoScroll(false);
-  };
+  useEffect(() => {
+    // Auto-scroll while streaming is true
+    if (isStreaming) {
+      setIsAutoScroll(true); // Re-enable auto-scroll when streaming starts
+    }
+  }, [isStreaming]);
 
   return (
-    <div className="flex flex-col h-full w-full">
+    <div className="flex flex-col h-full w-full overflow-hidden">
       {/* Chat Messages */}
-      <div
-        className="flex-1 overflow-y-auto space-y-4 p-4"
-        ref={containerRef}
-        onWheel={handleScroll}
-      >
-        {messages.map((message, idx) => {
-          const isLastIdx = idx === messages.length - 1;
+      <Virtuoso
+        ref={virtuosoRef} // Assign the ref to Virtuoso
+        data={messages}
+        className="flex-1 scrollbar-hide"
+        onWheel={handleScroll} // Disable auto-scroll on manual scroll
+        itemContent={(index, message) => {
+          const isLastIdx = index === messages.length - 1;
           return (
-            <React.Fragment key={idx}>
+            <>
               <ChatMessage role={message.role} content={message.content} />
               {isLastIdx && isStreaming ? (
                 <ChatStream
@@ -110,11 +117,11 @@ const ChatWindow: React.FC = () => {
                   isThinking={isThinking}
                 />
               ) : null}
-            </React.Fragment>
+            </>
           );
-        })}
-        <div ref={endOfContentRef} />
-      </div>
+        }}
+        overscan={200}
+      />
       {/* Chat Input */}
       <ChatInput
         handleSubmit={handleSubmit}

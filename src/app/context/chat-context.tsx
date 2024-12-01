@@ -1,35 +1,13 @@
 "use client";
 import React, { createContext, useContext, useReducer } from "react";
-
-// Define Message type and State structure
-type Message = { role: "user" | "assistant"; content: string };
-
-interface ChatState {
-  messages: Message[];
-  temperature: number;
-  maxTokens: number;
-  topP: number;
-  frequencyPenalty: number;
-  presencePenalty: number;
-  model: string;
-  responseFormat: { type: "text" };
-}
-
-// Define Actions
-export type ChatAction =
-  | { type: "ADD_MESSAGE"; payload: Message }
-  | { type: "LOAD_MESSAGES"; payload: Message[] }
-  | { type: "SET_MODEL"; payload: string }
-  | { type: "SET_TEMPERATURE"; payload: number }
-  | { type: "SET_MAX_TOKENS"; payload: number }
-  | { type: "SET_TOP_P"; payload: number }
-  | { type: "SET_FREQUENCY_PENALTY"; payload: number }
-  | { type: "SET_PRESENCE_PENALTY"; payload: number }
-  | { type: "SET_ALL_PARAMS"; payload: any }
-  | { type: "SET_RESPONSE_FORMAT"; payload: { type: "text" } };
+import {
+  IFCChatState,
+  IFCChatActionType,
+  IFCChatAction,
+} from "@/types/message";
 
 // Initial State
-const initialState: ChatState = {
+const initialState: IFCChatState = {
   messages: [],
   model: "gpt-4o",
   temperature: 1.0,
@@ -37,31 +15,31 @@ const initialState: ChatState = {
   topP: 1.0,
   frequencyPenalty: 0.0,
   presencePenalty: 0.0,
-  responseFormat: { type: "text" },
 };
 
 // Reducer function
-const chatReducer = (state: ChatState, action: ChatAction): ChatState => {
+const chatReducer = (
+  state: IFCChatState,
+  action: IFCChatAction
+): IFCChatState => {
   switch (action.type) {
-    case "LOAD_MESSAGES":
+    case IFCChatActionType.LOAD_MESSAGES:
       return { ...state, messages: action.payload };
-    case "SET_MODEL":
+    case IFCChatActionType.SET_MODEL:
       return { ...state, model: action.payload };
-    case "SET_RESPONSE_FORMAT":
-      return { ...state, responseFormat: { type: "text" } };
-    case "ADD_MESSAGE":
+    case IFCChatActionType.ADD_MESSAGE:
       return { ...state, messages: [...state.messages, action.payload] };
-    case "SET_TEMPERATURE":
+    case IFCChatActionType.SET_TEMPERATURE:
       return { ...state, temperature: action.payload };
-    case "SET_MAX_TOKENS":
+    case IFCChatActionType.SET_MAX_TOKENS:
       return { ...state, maxTokens: action.payload };
-    case "SET_TOP_P":
+    case IFCChatActionType.SET_TOP_P:
       return { ...state, topP: action.payload };
-    case "SET_FREQUENCY_PENALTY":
+    case IFCChatActionType.SET_FREQUENCY_PENALTY:
       return { ...state, frequencyPenalty: action.payload };
-    case "SET_PRESENCE_PENALTY":
+    case IFCChatActionType.SET_PRESENCE_PENALTY:
       return { ...state, presencePenalty: action.payload };
-    case "SET_ALL_PARAMS":
+    case IFCChatActionType.SET_ALL_PARAMS:
       return { ...state, ...action.payload };
     default:
       throw new Error(`Unhandled action type: ${action}`);
@@ -70,8 +48,8 @@ const chatReducer = (state: ChatState, action: ChatAction): ChatState => {
 
 // Create Context
 const ChatContext = createContext<{
-  state: ChatState;
-  dispatch: React.Dispatch<ChatAction>;
+  state: IFCChatState;
+  dispatch: React.Dispatch<IFCChatAction>;
 } | null>(null);
 
 // Provider Component

@@ -1,25 +1,12 @@
-import { openDB } from "idb";
-
-interface Message {
-  id: number; // Unique identifier for the message
-  role: string;
-  content: string;
-  timestamp: number;
-}
-
-interface Config {
-  // Define your configuration properties here
-  property1: string;
-  property2: number;
-  // ...
-}
+import { IFCChatAction, IFCChatParameters, IFCMessage } from "@/types/message";
+import { IDBPDatabase, openDB } from "idb";
 
 const dbName = "ai-chatbot";
 const dbVersion = 1;
 
 const objectStoreNames: string[] = ["messages", "config"];
 
-const openDatabase = async (): Promise<IDBDatabase> => {
+const openDatabase = async (): Promise<IDBPDatabase<unknown>> => {
   try {
     return await openDB(dbName, dbVersion, {
       upgrade(db) {
@@ -97,7 +84,6 @@ const updateData = async <T>(
     const tx = db.transaction(storeName, "readwrite");
     const store = tx.objectStore(storeName);
     await store.put({ ...newData, id: key });
-    await tx.done;
   } catch (error) {
     console.error("Error updating data:", error);
     throw error;
@@ -113,7 +99,6 @@ const deleteData = async (
     const tx = db.transaction(storeName, "readwrite");
     const store = tx.objectStore(storeName);
     await store.delete(key);
-    await tx.done;
   } catch (error) {
     console.error("Error deleting data:", error);
     throw error;
@@ -122,22 +107,22 @@ const deleteData = async (
 
 // Specific functions for messages and config
 
-const saveMessage = async (message: Message): Promise<void> => {
+const saveMessage = async (message: IFCMessage): Promise<void> => {
   await saveData("messages", message);
 };
 
-const getMessages = async (): Promise<Message[]> => {
-  return await getAllData<Message>("messages");
+const getMessages = async (): Promise<IFCMessage[]> => {
+  return await getAllData<IFCMessage>("messages");
 };
 
-const saveConfig = async (config: Config): Promise<void> => {
+const saveConfig = async (config: IFCChatParameters): Promise<void> => {
   // Add a unique key if not already present
   const configWithKey = { ...config, id: "parameters" }; // or any unique key you prefer
   await saveData("config", configWithKey);
 };
 
-const loadConfig = async (): Promise<Config | undefined> => {
-  return await getData<Config>("config", "parameters");
+const loadConfig = async (): Promise<IFCChatParameters | undefined> => {
+  return await getData<IFCChatParameters>("config", "parameters");
 };
 
 export {

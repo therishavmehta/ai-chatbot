@@ -1,5 +1,5 @@
 "use client";
-import { ChatProvider } from "../context/chatContext";
+import { ChatProvider } from "../context/chat-context";
 import "../styles/globals.css";
 import type { AppProps } from "next/app";
 
