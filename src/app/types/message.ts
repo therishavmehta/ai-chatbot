@@ -26,7 +26,6 @@ export enum IFCChatParameterKeys {
   topP = "topP",
   frequencyPenalty = "frequencyPenalty",
   presencePenalty = "presencePenalty",
-  model = "model",
 }
 
 export enum IFCChatActionType {

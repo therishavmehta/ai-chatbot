@@ -22,7 +22,7 @@ export const useStreamedText = () => {
   const [isThinking, setIsThinking] = useState<boolean>(false);
   const [isStreaming, setIsStreaming] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
-  const [pending, startTransition] = useTransition();
+  const [, startTransition] = useTransition();
   const [streamedText, setStreamedText] = useState("");
 
   const fetchStream = async (params: ChatState) => {

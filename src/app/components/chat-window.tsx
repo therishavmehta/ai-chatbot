@@ -7,7 +7,7 @@ import ChatInput from "./chat-input";
 import { useStreamedText } from "../hooks/useStreamedText";
 import ChatStream from "./chat-stream";
 import { saveMessage, getMessages } from "@/lib/indexedDB"; // Import the utility functions
-import { Virtuoso } from "react-virtuoso";
+import { Virtuoso, VirtuosoHandle } from "react-virtuoso";
 import { IFCChatActionType, IFCRole } from "@/types/message";
 
 const ChatWindow: React.FC = () => {
@@ -24,7 +24,7 @@ const ChatWindow: React.FC = () => {
   } = useStreamedText();
   const [input, setInput] = useState<string>("");
   const [isAutoScroll, setIsAutoScroll] = useState<boolean>(true);
-  const virtuosoRef = useRef<any>(null); // Virtuoso ref to interact with the list
+  const virtuosoRef = useRef<VirtuosoHandle>(null); // Virtuoso ref to interact with the list
 
   // Fetch chat history on initial load
   useEffect(() => {

@@ -20,7 +20,7 @@ import {
 } from "@/types/message";
 
 interface IFCParam {
-  key: string;
+  key: IFCChatParameterKeys;
   label: string;
   param: IFCChatActionType;
   min: number;
@@ -82,7 +82,7 @@ const ChatParameters: React.FC = () => {
     presencePenalty: state.presencePenalty,
   });
   const [initialConfig, setInitialConfig] =
-    useState<IFCChatParameters>(localConfig); // Store initial config for comparison
+    useState<Partial<IFCChatParameters>>(localConfig); // Store initial config for comparison
   const [openToast, setOpenToast] = useState({
     title: "",
     description: "",
@@ -106,7 +106,7 @@ const ChatParameters: React.FC = () => {
     loadInitialConfig();
   }, [dispatch]);
 
-  const handleInputChange = (field: string, value: any) => {
+  const handleInputChange = (field: IFCChatParameterKeys, value: number) => {
     setLocalConfig((prevConfig) => ({
       ...prevConfig,
       [field]: value,
@@ -169,19 +169,20 @@ const ChatParameters: React.FC = () => {
         </Select>
       </div>
       {params.map((item, idx) => {
-        const key = item.key as IFCChatParameterKeys;
         return (
           <div key={idx} className="mb-4">
             <Label className="block text-sm font-medium mb-2 text-foreground-secondary">
-              {item.label}: {localConfig[key]}
+              {item.label}: {localConfig[item.key]}
             </Label>
             <Slider
-              defaultValue={[localConfig[key]]}
+              defaultValue={[localConfig[item.key]]}
               min={item.min}
               max={item.max}
               step={item.step}
-              value={[localConfig[key]]}
-              onValueChange={(value: any) => handleInputChange(key, value[0])}
+              value={[localConfig[item.key]]}
+              onValueChange={(value: number[]) =>
+                handleInputChange(item.key, value[0])
+              }
               className="w-full"
             />
             <div className="flex justify-between text-sm text-foreground-tertiary mt-1">

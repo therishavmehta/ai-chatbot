@@ -1,4 +1,4 @@
-import { IFCChatAction, IFCChatParameters, IFCMessage } from "@/types/message";
+import { IFCChatParameters, IFCMessage } from "@/types/message";
 import { IDBPDatabase, openDB } from "idb";
 
 const dbName = "ai-chatbot";

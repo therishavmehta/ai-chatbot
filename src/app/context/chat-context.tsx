@@ -1,5 +1,5 @@
 "use client";
-import React, { createContext, useContext, useReducer } from "react";
+import React, { createContext, Reducer, useContext, useReducer } from "react";
 import {
   IFCChatState,
   IFCChatActionType,
@@ -56,7 +56,10 @@ const ChatContext = createContext<{
 export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({
   children,
 }) => {
-  const [state, dispatch] = useReducer(chatReducer, initialState);
+  const [state, dispatch] = useReducer<Reducer<IFCChatState, IFCChatAction>>(
+    chatReducer,
+    initialState
+  );
 
   return (
     <ChatContext.Provider value={{ state, dispatch }}>
