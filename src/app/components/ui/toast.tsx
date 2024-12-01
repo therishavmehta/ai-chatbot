@@ -4,9 +4,15 @@ import React, { useEffect, useState } from "react";
 import * as Toast from "@radix-ui/react-toast";
 import { clsx } from "clsx"; // Optional for combining classNames
 
+export interface IFCParams {
+  title: string;
+  description: string;
+  open: boolean;
+}
+
 interface ThemedToastProps {
   open: boolean;
-  setOpen: (value: any) => void;
+  setOpen: (value: IFCParams) => void;
   title: string;
   description: string;
 }
@@ -36,7 +42,10 @@ const ThemedToast = ({
         {/* Toast Root */}
         <Toast.Root
           open={open}
-          onOpenChange={setOpen}
+          onOpenChange={setOpen.bind(
+            {},
+            { title: "", description: "", open: false }
+          )}
           className={clsx(
             "bg-gray-900 text-white shadow-lg rounded-lg p-4",
             "border border-gray-700",

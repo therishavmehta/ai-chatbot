@@ -1,7 +1,6 @@
 "use client";
 
-import React, { useState, useRef, useEffect, KeyboardEvent } from "react";
-import { useChatContext } from "../context/chat-context";
+import React, { useRef, useEffect, KeyboardEvent } from "react";
 import { Send } from "lucide-react";
 import { Button } from "./ui/button";
 

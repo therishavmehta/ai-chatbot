@@ -5,12 +5,12 @@ import rehypeHighlight from "rehype-highlight";
 import remarkGfm from "remark-gfm";
 import "highlight.js/styles/github.css";
 import { Copy, Brain } from "lucide-react";
-import ThemedToast from "./ui/toast";
+import ThemedToast, { IFCParams } from "./ui/toast";
 import { IFCMessage } from "@/types/message";
 
 const ChatMessage: React.FC<IFCMessage> = ({ role = "user", content = "" }) => {
   const isUser = role === "user";
-  const [openToast, setOpenToast] = useState({
+  const [openToast, setOpenToast] = useState<IFCParams>({
     title: "",
     description: "",
     open: false,
