@@ -3,6 +3,7 @@
 import React, { useRef, useEffect, KeyboardEvent } from "react";
 import { Send } from "lucide-react";
 import { Button } from "./ui/button";
+import { useChatContext } from "@/context/chat-context";
 
 interface ChatInput {
   handleSubmit: (e: React.FormEvent) => void;
@@ -16,6 +17,9 @@ const ChatInput: React.FC<ChatInput> = ({
   setInput,
 }: ChatInput) => {
   const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const {
+    state: { maxTokens },
+  } = useChatContext();
 
   const handleKeyDown = (e: KeyboardEvent<HTMLTextAreaElement>) => {
     if (e.key === "Enter" && (e.metaKey || e.ctrlKey)) {
@@ -46,7 +50,7 @@ const ChatInput: React.FC<ChatInput> = ({
           ref={textareaRef}
           value={input}
           onKeyDown={handleKeyDown}
-          onChange={(e) => setInput(e.target.value.slice(0, 1000))}
+          onChange={(e) => setInput(e.target.value.slice(0, maxTokens))}
           className="flex-1 bg-transparent text-foreground-primary outline-none px-2 resize-none overflow-auto"
           placeholder="Enter your message..."
           rows={1} // Start with a single row

@@ -5,9 +5,11 @@ import type { AppProps } from "next/app";
 
 function MyApp({ Component, pageProps }: AppProps) {
   return (
-    <ChatProvider>
-      <Component {...pageProps} />
-    </ChatProvider>
+    <>
+      <ChatProvider>
+        <Component {...pageProps} />
+      </ChatProvider>
+    </>
   );
 }
 
